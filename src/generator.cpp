@@ -1,89 +1,113 @@
-#include <QGroupBox>
-#include <QLabel>
-#include <QPushButton>
-#include <QSpinBox>
-#include <QTime>
-#include <QVBoxLayout>
-
-#include <random>
-#include <qglobal.h>
-
-#include "config.h"
 #include "generator.h"
-
-
-Generator::Generator( QWidget* parent )
-    : QWidget( parent )
+#include "ui_generator.h"
+#include <random>
+#include <iostream>
+#include <QMessageBox>
+#include <QTextStream>
+#include <QFileDialog>
+Generator::Generator(QWidget *parent)
+    : QMainWindow(parent)
+      , ui(new Ui::Generator)
 {
-    _init();
-    _createDisplay ();
-    _createButton ();
-    _createSpinBoxes ();
-    connect ( _button, SIGNAL(clicked()), this, SLOT(showNumber()) );
+    ui->setupUi(this);
+    connect(ui->generateButton, &QPushButton::clicked, this, &Generator::generateNumber);
+    connect(ui->clearButton,    &QPushButton::clicked, this, &Generator::clear);
+    connect(ui->saveButton,     &QPushButton::clicked, this, &Generator::saveToFile);
+    connect(ui->exitButton,     &QPushButton::clicked, this, &QApplication::exit);
 }
-void Generator::_init() {
-    QTime time = QTime::currentTime ();
-    qsrand( static_cast< uint >( time.msec ()) );
-    setFixedSize( Config::Window::width, Config::Window::height );
-    setWindowTitle( "Random Number Generator" );
-}
-void Generator::_createButton() {
-    _button = new QPushButton( Config::Button::title, this );
-    _button->setGeometry ( Config::Button::pos_x,
-                           Config::Button::pos_y,
-                           Config::Button::width,
-                           Config::Button::height );
-}
-void Generator::_createDisplay() {
-     _display = new QLabel( this );
-     _display->setFont      ( Config::Fonts::sansFont );
-     _display->setAlignment ( Qt::AlignCenter);
-     _display->setGeometry  ( Config::Display::pos_x,
-                              Config::Display::pos_y,
-                              Config::Display::width,
-                              Config::Display::height );
 
-     _display->setNum ( Config::Display::default_value );
-}
-void Generator::_createSpinBoxes() {
-    _createMinSpinBox();
-    _createMaxSpinBox();
-    _createSpinBoxLayout();
-}
-void Generator::_createSpinBoxLayout(){
-    _groupBox        = new QGroupBox( this );
-    _layout          = new QVBoxLayout;
-    QLabel* labelMin = new QLabel( tr("Minimum: ") );
-    QLabel* labelMax = new QLabel( tr("Maximum: ") );
-
-    _layout->addWidget   ( labelMin );
-    _layout->addWidget   ( _minSpinBox );
-    _layout->addWidget   ( labelMax );
-    _layout->addWidget   ( _maxSpinBox );
-    _groupBox->setLayout ( _layout );
-}
-void Generator::_createMaxSpinBox() {
-    _maxSpinBox = new QSpinBox ( this );
-    _maxSpinBox->setMinimum    ( Config::SpinBox::minimum );
-    _maxSpinBox->setMaximum    ( Config::SpinBox::maximum );
-    _maxSpinBox->setSingleStep ( Config::SpinBox::single_step );
-    _maxSpinBox->setValue      ( Config::SpinBox::default_value );
-}
-void Generator::_createMinSpinBox() {
-    _minSpinBox = new QSpinBox ( this );
-    _minSpinBox->setMinimum    ( Config::SpinBox::minimum );
-    _minSpinBox->setMaximum    ( Config::SpinBox::maximum );
-    _minSpinBox->setSingleStep ( Config::SpinBox::single_step );
-    _minSpinBox->setValue      ( Config::SpinBox::default_value );
-}
-int Generator::_generateNumber( int low, int high ) {
-
-    if ( low > high ) {
-        throw BadParameters( "Upper bound is NOT higher \n" );
+void Generator::generateNumber() {
+    clear();
+    // if the upper bound is not higher or # of numbers is < 0
+    if (!_correctInputParameters ()) {
+        QMessageBox::warning ( this, tr("Wrong input"), tr( "Upper bound is not higher or # of nums is < 0") );
+        return;
     }
-    return qrand() % (( high + 1) - low) + low;
+
+
+    int numbersCount = ui->numbers->value ();
+    QString separator = ui->separator->currentText ();
+    _nums = "";
+    // random numbers
+    if (ui->random->isChecked ()) {
+        _generateNumbers (0, numbersCount, true);
+    }
+    // sequential numbers
+    else {
+        int lower = ui->minimumSpinBox->value ();
+        int upper = ui->maximumSpinBox->value ();
+        _generateNumbers (lower, upper + 1, false);
+    }
+    ui->textEdit->setText (_nums);
 }
-void Generator::showNumber() {
-    _display->setNum( _generateNumber( _minSpinBox->value(),
-                                       _maxSpinBox->value () ));
+
+void Generator::_generateNumbers( int low, int high, bool random ) {
+    QString separator = _getSeparator();
+
+    for ( qint32 i = low; i < high; ++i ) {
+        if ( random ) {
+            _nums += QString::number (_generateNumber ());
+        }
+        else { // sequential
+            _nums += QString::number( i );
+        }
+        _nums += separator;
+        // output into multiple lines
+        if (!_oneLineOutput ()) {
+            _nums += "\n";
+        }
+    }
+    // get rid of the last separator char
+    if ( _oneLineOutput () && separator != "" ) { _removeLastChar(_nums);}
+}
+
+void Generator::saveToFile () {
+    QString filename = QFileDialog::getSaveFileName (this, tr("Save numbers"), "", tr("Text file (*.txt);;All Files(*)"));
+    if ( filename.isEmpty () ) { return; }
+    else {
+        QFile output(filename);
+        if ( !output.open(QIODevice::WriteOnly | QIODevice::Text) ) {
+            QMessageBox::information( this,
+                                      tr("Unable to open file"),
+                                      output.errorString() );
+            return;
+        }
+        QTextStream ts(&output);
+        ts << _nums.toUtf8 ();
+        output.close();
+    }
+}
+
+bool Generator::_correctInputParameters() {
+    return ui->minimumSpinBox->value () <= ui->maximumSpinBox->value ()
+        && ui->numbers->value () >= 0;
+}
+
+void Generator::clear (){
+    ui->textEdit->clear ();
+}
+
+qint32 Generator::_generateNumber() {
+    std::random_device rd;
+    std::default_random_engine eng(rd());
+    std::uniform_int_distribution< qint32 > distr( ui->minimumSpinBox->value (),
+                                                ui->maximumSpinBox->value () );
+    return distr(eng);
+}
+
+Generator::~Generator()
+{
+    delete ui;
+}
+bool Generator::_oneLineOutput() {
+    return ui->oneLine->isChecked ();
+}
+void Generator::_removeLastChar( QString &string ) {
+    string.remove ( string.size () - 1, 1 );
+}
+QString Generator::_getSeparator() {
+    auto separator = ui->separator->currentText();
+    if ( separator == "(space)") return " ";
+    if ( separator == "(nothing)") return "";
+    return separator;
 }

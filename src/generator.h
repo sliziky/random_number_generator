@@ -1,43 +1,34 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
-#include <QWidget>
-#include <exception>
-class QPushButton;
-class QLabel;
+#include <QMainWindow>
 class QSpinBox;
-class QGroupBox;
-class QVBoxLayout;
+namespace Ui {
+    class Generator;
+}
 
-struct BadParameters : std::logic_error
-{
-    using std::logic_error::logic_error;
-};
-
-class Generator : public QWidget
+class Generator : public QMainWindow
 {
     Q_OBJECT
+
 public:
-    explicit Generator( QWidget* parent = nullptr );
+    explicit Generator(QWidget *parent = nullptr);
+    ~Generator();
+
 public slots:
-    void showNumber();
-signals:
+    void generateNumber();
+    void clear();
+    void saveToFile();
 
 private:
-    QPushButton* _button;
-    QLabel*      _display;
-    QSpinBox*    _minSpinBox;
-    QSpinBox*    _maxSpinBox;
-    QGroupBox*   _groupBox;
-    QVBoxLayout* _layout;
-    int          _generateNumber( int low, int high );
-    void         _createSpinBoxes();
-    void         _createMinSpinBox();
-    void         _createMaxSpinBox();
-    void         _createSpinBoxLayout();
-    void         _createButton();
-    void         _createDisplay();
-    void         _init();
+    Ui::Generator *ui;
+    qint32        _generateNumber();
+    QString       _nums;
+    bool          _correctInputParameters();
+    bool          _oneLineOutput();
+    void          _generateNumbers( int from, int to, bool random );
+    void          _removeLastChar( QString& string );
+    QString       _getSeparator();
 };
 
 #endif // GENERATOR_H
