@@ -1,4 +1,5 @@
 # random_number_generator
-Simple QT GUI app which generates random numbers in range &lt;min, max> 
+Simple QT GUI app which generates numbers in range &lt;min, max>
+Numbers are either random or sequential.
 
-![alt text](https://i.imgur.com/NUBC4g1.png)
+![alt text](https://i.imgur.com/YwXjFYh.png)
