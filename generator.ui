@@ -6,21 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>502</width>
-    <height>586</height>
+    <width>579</width>
+    <height>607</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Number Generator</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>31</y>
       <width>482</width>
-      <height>531</height>
+      <height>534</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -41,10 +41,23 @@
        <property name="midLineWidth">
         <number>0</number>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <layout class="QFormLayout" name="formLayout">
-          <item row="1" column="0">
+       <layout class="QFormLayout" name="formLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Numbers: </string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
            <widget class="QRadioButton" name="sequential">
             <property name="font">
              <font>
@@ -64,7 +77,24 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item>
+           <widget class="QRadioButton" name="sequentialn">
+            <property name="font">
+             <font>
+              <family>Consolas</family>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QRadioButton {color:red}</string>
+            </property>
+            <property name="text">
+             <string>Sequential - n</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QRadioButton" name="random">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -81,6 +111,8 @@
             <property name="font">
              <font>
               <family>Consolas</family>
+              <weight>75</weight>
+              <bold>true</bold>
              </font>
             </property>
             <property name="layoutDirection">
@@ -94,19 +126,6 @@
             </property>
             <property name="checked">
              <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="font">
-             <font>
-              <family>Times New Roman</family>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Numbers: </string>
             </property>
            </widget>
           </item>
@@ -153,6 +172,9 @@
             <property name="maximum">
              <number>99999</number>
             </property>
+            <property name="value">
+             <number>5</number>
+            </property>
            </widget>
           </item>
           <item row="1" column="1" alignment="Qt::AlignRight">
@@ -196,7 +218,7 @@
              <number>100000</number>
             </property>
             <property name="value">
-             <number>0</number>
+             <number>10</number>
             </property>
            </widget>
           </item>
