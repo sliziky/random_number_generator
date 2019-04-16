@@ -5,6 +5,9 @@
 #include <QMessageBox>
 #include <QTextStream>
 #include <QFileDialog>
+namespace Ui {
+	class Generator;
+}
 Generator::Generator(QWidget *parent)
     : QMainWindow(parent)
       , ui(new Ui::Generator)
@@ -28,13 +31,13 @@ void Generator::on_generateButton_clicked (){
     int numberCount = ui->numbers->value ();
     // random numbers
     if (ui->random->isChecked ()) {
-        _generateNumbers (low, high, "random");
+        _generateNumbers (low, high, mode::random);
     }
     if (ui->sequential->isChecked ()) {
-        _generateNumbers (low, high + 1, "sequential");
+        _generateNumbers (low, high + 1, mode::sequential);
     }
     if (ui->sequentialn->isChecked ()) {
-        _generateNumbers (low, low + numberCount, "sequential-n");
+        _generateNumbers (low, low + numberCount, mode::sequentialn);
     }
 
     ui->textEdit->setText (_nums);
@@ -52,28 +55,23 @@ void Generator::on_sequentialn_clicked() {
     ui->maximumSpinBox->setEnabled (false);
     ui->numbers->setEnabled (true);
 }
-void Generator::_generateNumbers( int low, int high, const QString& mode ) {
+void Generator::_generateNumbers( int low, int high, const mode& mode ) {
     QString separator = _getSeparator();
     bool isOneLine = _isOneLineOutput ();
-    if ( mode == "random" ) {
+    if ( mode == mode::random ) {
         int numbersCount = ui->numbers->value ();
         for ( qint32 i = 0; i < numbersCount; ++i ) {
             _nums += QString::number ( _generateRandomNumber (low, high));
             _appendSeparator ( separator, isOneLine );
         }
     }
-    if ( mode == "sequential" ) {
+    if ( mode == mode::sequential || mode == mode::sequentialn ) {
         for ( int i = low; i < high; ++i ) {
             _nums += QString::number( i );
             _appendSeparator ( separator, isOneLine );
         }
     }
-    if ( mode == "sequential-n" ) {
-        for ( int i = low; i < high; ++i ) {
-            _nums += QString::number( i );
-            _appendSeparator ( separator, isOneLine );
-        }
-    }
+
 
     // get rid of the last separator char
     if ( _isOneLineOutput () && separator != "" ) { _removeLastChar(_nums);}

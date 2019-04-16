@@ -33,12 +33,13 @@ private slots:
 
 private:
     Ui::Generator *ui;
+	enum class    mode{ random, sequential, sequentialn };
     qint32        _generateRandomNumber(int low, int high);
     QString       _getSeparator();
     QString       _nums;
     bool          _hasCorrectInputParameters();
     bool          _isOneLineOutput();
-    void          _generateNumbers( int low, int high, const QString& );
+    void          _generateNumbers( int low, int high, const mode& );
     void          _removeLastChar( QString& );
     void          _appendSeparator( const QString&, bool );
 };
